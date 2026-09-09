@@ -21,5 +21,12 @@ if (env('APP_STORAGE')) {
     $app->useStoragePath(env('APP_STORAGE'));
 }
 
+$app->booting(function () {
+    if (empty(config('session.driver'))) {
+        config(['session.driver' => 'cookie']);
+    }
+});
+
 return $app;
+
 
