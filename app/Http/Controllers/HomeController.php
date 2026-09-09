@@ -9,7 +9,12 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $latestEvents = Event::latest()->take(3)->get();
+        try {
+            $latestEvents = Event::latest()->take(3)->get();
+        } catch (\Throwable $e) {
+            $latestEvents = collect();
+        }
+
         return view('home', compact('latestEvents'));
     }
 }
