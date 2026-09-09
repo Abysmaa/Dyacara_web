@@ -1,6 +1,7 @@
 {
   "version": 2,
   "framework": null,
+  "outputDirectory": "public",
   "buildCommand": "npm run build",
   "functions": {
     "api/index.php": {
@@ -10,11 +11,11 @@
   "routes": [
     {
       "src": "/build/(.*)",
-      "dest": "/public/build/$1"
+      "dest": "/build/$1"
     },
     {
       "src": "/(css|js|images|favicon.ico|robots.txt)(.*)",
-      "dest": "/public/$1$2"
+      "dest": "/$1$2"
     },
     {
       "src": "/(.*)",
