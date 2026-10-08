@@ -48,6 +48,7 @@ class ServiceResource extends Resource
                 Forms\Components\TextInput::make('price')
                     ->label('Harga')
                     ->numeric()
+                    ->minValue(1)
                     ->prefix('Rp')
                     ->required(),
                 Forms\Components\Toggle::make('is_active')

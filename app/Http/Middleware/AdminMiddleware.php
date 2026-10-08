@@ -10,11 +10,12 @@ class AdminMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-        if (Auth::check() && Auth::user()->is_admin) {
-            return $next($request);
+        if (! Auth::check()) {
+            return redirect()->guest(route('login'));
         }
 
-        Auth::logout();
-        return redirect('/admin/login')->with('error', 'Akses ditolak. Anda bukan admin.');
+        abort_unless(Auth::user()->isAdmin(), 403);
+
+        return $next($request);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\EventStatus;
 use App\Filament\Resources\EventResource\Pages;
 use App\Models\Event;
 use Filament\Forms;
@@ -58,12 +59,8 @@ class EventResource extends Resource
                             ->separator(','),
                         Forms\Components\Select::make('status')
                             ->label('Status')
-                            ->options([
-                                'upcoming' => 'Akan Datang',
-                                'ongoing' => 'Sedang Berlangsung',
-                                'completed' => 'Selesai'
-                            ])
-                            ->default('upcoming')
+                            ->options(EventStatus::options())
+                            ->default(EventStatus::Upcoming->value)
                     ])
             ]);
     }
@@ -85,15 +82,15 @@ class EventResource extends Resource
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'engagement' => 'primary',
-                        'gathering' => 'success',
-                        'birthday' => 'warning',
-                        default => 'secondary',
+                        'gathering'  => 'success',
+                        'birthday'   => 'warning',
+                        default      => 'secondary',
                     })
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'engagement' => 'Engagement',
-                        'gathering' => 'Family Gathering',
-                        'birthday' => 'Birthday Party',
-                        default => ucfirst($state),
+                        'gathering'  => 'Family Gathering',
+                        'birthday'   => 'Birthday Party',
+                        default      => ucfirst($state),
                     }),
                 Tables\Columns\TextColumn::make('event_date')
                     ->label('Tanggal')
@@ -101,22 +98,19 @@ class EventResource extends Resource
                 Tables\Columns\TextColumn::make('status')
                     ->label('Status')
                     ->badge()
+                    ->formatStateUsing(fn (string $state): string => EventStatus::from($state)->label()),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('category')
                     ->label('Kategori')
                     ->options([
                         'engagement' => 'Engagement Event',
-                        'gathering' => 'Family Gathering',
-                        'birthday' => 'Birthday Party'
+                        'gathering'  => 'Family Gathering',
+                        'birthday'   => 'Birthday Party',
                     ]),
                 Tables\Filters\SelectFilter::make('status')
                     ->label('Status')
-                    ->options([
-                        'upcoming' => 'Akan Datang',
-                        'ongoing' => 'Sedang Berlangsung',
-                        'completed' => 'Selesai'
-                    ])
+                    ->options(EventStatus::options()),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),

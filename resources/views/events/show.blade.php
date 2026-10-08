@@ -36,7 +36,7 @@
             <div class="col-lg-8">
                 <!-- Event Image -->
                 <div class="event-image mb-4">
-                    <img src="{{ Storage::disk('public')->url($event->image) }}" class="img-fluid rounded shadow" alt="{{ $event->title }}">
+                    <img src="{{ $event->image ? Storage::disk('public')->url($event->image) : asset('images/event-default.jpg') }}" class="img-fluid rounded shadow" alt="{{ $event->title }}">
                 </div>
 
                 <!-- Event Description -->
@@ -44,7 +44,7 @@
                     <div class="card-body">
                         <h4>Deskripsi Event</h4>
                         <div class="event-description mt-3">
-                            {!! $event->description !!}
+                            {!! $event->sanitized_description !!}
                         </div>
                     </div>
                 </div>
@@ -56,7 +56,7 @@
                         <div class="row mt-3">
                             <div class="col-md-6">
                                 <ul class="list-unstyled">
-                                    @foreach (explode(',', $event->features) as $feature)
+                                    @foreach ((array) $event->features as $feature)
                                         <li class="mb-2">
                                             <i class="fas fa-check-circle text-success me-2"></i> {{ trim($feature) }}
                                         </li>
@@ -72,6 +72,9 @@
 
             <!-- Sidebar -->
             <div class="col-lg-4">
+                @if (session('success'))
+                    <div class="alert alert-success">{{ session('success') }}</div>
+                @endif
                 <!-- Contact Card -->
                 <div class="card mb-4">
                     <div class="card-body">
@@ -82,6 +85,38 @@
                         </a>
                     </div>
                 </div>
+                @auth
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Pesan Event Ini</h5>
+                                @if ($event->status === 'completed' || $event->event_date->isBefore(today()))
+                                    <div class="alert alert-secondary mb-0">Event ini sudah selesai dan tidak menerima pemesanan.</div>
+                                @else
+                                    <p class="text-muted">Permintaan pemesanan akan menggunakan tanggal event ini dan menunggu konfirmasi tim kami.</p>
+                                    @error('event')
+                                        <div class="alert alert-danger">{{ $message }}</div>
+                                    @enderror
+                                    <form action="{{ route('events.book', $event) }}" method="POST">
+                                        @csrf
+                                        <div class="mb-3">
+                                            <label for="booking-phone" class="form-label">Nomor Telepon</label>
+                                            <input id="booking-phone" name="phone" type="tel" class="form-control" value="{{ old('phone') }}" required maxlength="20">
+                                            @error('phone')
+                                                <div class="text-danger">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="booking-notes" class="form-label">Catatan (opsional)</label>
+                                            <textarea id="booking-notes" name="notes" class="form-control" rows="3" maxlength="2000">{{ old('notes') }}</textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary w-100">Kirim Permintaan</button>
+                                    </form>
+                                @endif
+                            </div>
+                    </div>
+                @else
+                    <a href="{{ route('login') }}" class="btn btn-primary w-100">Masuk untuk Memesan Event</a>
+                @endauth
             </div>
         </div>
     </div>

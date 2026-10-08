@@ -35,10 +35,13 @@
                         <option value="serpong" {{ request('location') == 'serpong' ? 'selected' : '' }}>Serpong</option>
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <input type="date" class="form-control shadow-sm" name="date" id="dateFilter" value="{{ request('date') }}">
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
+                    <input type="search" class="form-control shadow-sm" name="search" placeholder="Cari event" value="{{ request('search') }}">
+                </div>
+                <div class="col-md-2">
                     <button type="submit" class="btn btn-primary w-100 shadow-sm" id="filterButton">
                         <i class="fas fa-filter me-2"></i>Filter
                     </button>
@@ -100,6 +103,9 @@
                 </div>
             </div>
             @endforelse
+        </div>
+        <div class="d-flex justify-content-center mt-4">
+            {{ $events->links() }}
         </div>
     </div>
 </section>

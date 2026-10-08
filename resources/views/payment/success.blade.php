@@ -6,11 +6,25 @@
             <div class="col-md-8">
                 <div class="card shadow">
                     <div class="card-body">
+                        @if (session('warning'))
+                            <div class="alert alert-warning">{{ session('warning') }}</div>
+                        @endif
                         <div class="row mb-4">
                             <div class="col-sm-6">
                                 <h3 class="text-dark mb-1">INVOICE</h3>
-                                <small class="text-muted">Status: <span class="badge bg-warning">Menunggu
-                                        Verifikasi</span></small>
+                                <small class="text-muted">Status:
+                                    <span class="badge {{ match ($payment->status) {
+                                        'verified' => 'bg-success',
+                                        'rejected' => 'bg-danger',
+                                        default => 'bg-warning',
+                                    } }}">
+                                        {{ match ($payment->status) {
+                                            'verified' => 'Terverifikasi',
+                                            'rejected' => 'Ditolak',
+                                            default => 'Menunggu Verifikasi',
+                                        } }}
+                                    </span>
+                                </small>
                             </div>
                             <div class="col-sm-6 text-sm-end">
                                 <img src="{{ asset('images/logo.png') }}" alt="Logo" style="height: 50px;">
@@ -45,14 +59,14 @@
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>{{ $payment->service }}</td>
+                                        <td>Uang muka 10% - {{ $payment->service }}</td>
                                         <td class="text-end">Rp {{ number_format($payment->amount, 0, ',', '.') }}</td>
                                     </tr>
                                 </tbody>
                                 <tfoot>
                                     <tr>
-                                        <th>Total</th>
-                                        <th class="text-end">Rp {{ number_format($payment->amount * 0.1 , 0, ',', '.') }}</th>
+                                        <th>Total uang muka</th>
+                                        <th class="text-end">Rp {{ number_format($payment->amount, 0, ',', '.') }}</th>
                                     </tr>
                                 </tfoot>
                             </table>

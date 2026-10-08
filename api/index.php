@@ -11,26 +11,35 @@ $directories = [
 ];
 
 foreach ($directories as $directory) {
-    if (!is_dir($directory)) {
-        @mkdir($directory, 0755, true);
+    if (!is_dir($directory) && !mkdir($directory, 0755, true) && !is_dir($directory)) {
+        throw new RuntimeException("Unable to create serverless runtime directory: $directory");
     }
 }
 
-// Salin packages.php dan services.php ke /tmp jika ada
-if (!file_exists('/tmp/packages.php') && file_exists(__DIR__ . '/../bootstrap/cache/packages.php')) {
-    @copy(__DIR__ . '/../bootstrap/cache/packages.php', '/tmp/packages.php');
+// Load autoloader terlebih dahulu
+if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
+    require_once __DIR__ . '/../vendor/autoload.php';
 }
-if (!file_exists('/tmp/services.php') && file_exists(__DIR__ . '/../bootstrap/cache/services.php')) {
-    @copy(__DIR__ . '/../bootstrap/cache/services.php', '/tmp/services.php');
+
+// Filter dan siapkan packages.php di /tmp agar hanya memuat provider yang terinstall
+if (file_exists(__DIR__ . '/../bootstrap/cache/packages.php')) {
+    $packages = require __DIR__ . '/../bootstrap/cache/packages.php';
+    foreach ($packages as $pkg => $config) {
+        if (!empty($config['providers'])) {
+            $packages[$pkg]['providers'] = array_values(array_filter(
+                $config['providers'],
+                fn($p) => class_exists($p)
+            ));
+        }
+    }
+    file_put_contents('/tmp/packages.php', '<?php return ' . var_export($packages, true) . ';');
 }
 
 // Default environment variables untuk serverless
-// (Vercel mengabaikan blok "env" di vercel.json, sehingga diset di sini sebagai fallback)
 $defaults = [
     'APP_NAME' => 'DYACARA',
     'APP_ENV' => 'production',
-    'APP_DEBUG' => 'true',
-    'APP_KEY' => 'base64:Qd/uZP2FlkGyA9Hf+oAA7Mw1AaOZX3Vfk4i0YwSfSfs=',
+    'APP_DEBUG' => 'false',
     'APP_STORAGE' => '/tmp/storage',
     'VIEW_COMPILED_PATH' => '/tmp/storage/framework/views',
     'APP_PACKAGES_CACHE' => '/tmp/packages.php',

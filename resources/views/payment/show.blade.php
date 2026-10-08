@@ -13,7 +13,7 @@
                         <h5>Detail Pembayaran:</h5>
                         <p>Layanan: {{ $service }}</p>
                         <p>Total Pembayaran: Rp {{ number_format($amount, 0, ',', '.') }}</p>
-                        <p>DP (10%): Rp {{ number_format($amount * 0.1, 0, ',', '.') }}</p>
+                        <p>DP (10%): Rp {{ number_format($depositAmount, 0, ',', '.') }}</p>
                         
                         <h5 class="mt-4">Informasi Rekening:</h5>
                         <p class="mb-2">Transfer Bank:</p>
@@ -31,8 +31,7 @@
 
                     <form action="{{ route('payment.confirm') }}" method="POST" enctype="multipart/form-data">
                         @csrf
-                        <input type="hidden" name="service" value="{{ $service }}">
-                        <input type="hidden" name="amount" value="{{ $amount }}">
+                        <input type="hidden" name="service" value="{{ $serviceSlug }}">
                         <div class="mb-3">
                             <label class="form-label">Nama Lengkap</label>
                             <input type="text" class="form-control" name="name" required>

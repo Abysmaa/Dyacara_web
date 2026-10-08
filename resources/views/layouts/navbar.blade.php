@@ -71,6 +71,16 @@
                                     <i class="fas fa-user-circle me-2"></i>Profile
                                 </a>
                             </li>
+                            <li>
+                                <a class="dropdown-item" href="{{ route('bookings.index') }}">
+                                    <i class="fas fa-calendar-check me-2"></i>Pemesanan Saya
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{{ route('payments') }}">
+                                    <i class="fas fa-receipt me-2"></i>Pembayaran Saya
+                                </a>
+                            </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form action="{{ route('logout') }}" method="POST" class="d-inline">

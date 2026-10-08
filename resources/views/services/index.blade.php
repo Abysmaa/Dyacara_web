@@ -38,7 +38,7 @@
                         </div>
                     </div>
                     <div class="card-footer bg-white border-top-0">
-                        <a href="{{ route('payment.show', ['service' => $service->name, 'amount' => $service->price]) }}" 
+                        <a href="{{ route('payment.show', ['service' => $service->slug]) }}"
                            class="btn btn-primary w-100 mb-2">Pesan Sekarang</a>
                         <a href="/contact" class="btn btn-outline-primary w-100">Hubungi Kami</a>
                     </div>
@@ -101,53 +101,3 @@
     </div>
 </section>
 @endsection
-
-@push('scripts')
-<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const payButtons = document.querySelectorAll('.pay-button');
-    
-    payButtons.forEach(button => {
-        button.addEventListener('click', async function() {
-            const service = this.dataset.service;
-            const price = this.dataset.price;
-            
-            try {
-                const response = await fetch('/create-payment', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    },
-                    body: JSON.stringify({
-                        service: service,
-                        price: price
-                    })
-                });
-                
-                const data = await response.json();
-                
-                window.snap.pay(data.snapToken, {
-                    onSuccess: function(result) {
-                        window.location.href = '/payment-success';
-                    },
-                    onPending: function(result) {
-                        alert('Pembayaran pending, silakan selesaikan pembayaran Anda');
-                    },
-                    onError: function(result) {
-                        alert('Pembayaran gagal, silakan coba lagi');
-                    },
-                    onClose: function() {
-                        alert('Anda menutup popup pembayaran sebelum menyelesaikan pembayaran');
-                    }
-                });
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Terjadi kesalahan, silakan coba lagi');
-            }
-        });
-    });
-});
-</script>
-@endpush

@@ -20,8 +20,7 @@ class LoginController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
-            // Cek apakah pengguna adalah admin
-            if (Auth::user()->role === 'admin') {
+            if (Auth::user()->is_admin) {
                 return redirect()->route('filament.admin.pages.dashboard');
             }
 

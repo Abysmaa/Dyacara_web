@@ -14,6 +14,7 @@ return [
     */
 
     'default' => env('FILESYSTEM_DISK', 'local'),
+    'payment_proofs' => env('PAYMENT_PROOFS_DISK', 'local'),
 
     /*
     |--------------------------------------------------------------------------
@@ -39,10 +40,16 @@ return [
         ],
 
         'public' => [
-            'driver' => 'local',
-            'root' => storage_path('app/public'),
-            'url' => env('APP_URL').'/storage',
+            'driver' => env('PUBLIC_FILESYSTEM_DRIVER', 'local'),
+            'root' => env('PUBLIC_FILESYSTEM_ROOT', storage_path('app/public')),
+            'url' => env('PUBLIC_FILESYSTEM_URL', env('AWS_URL', env('APP_URL').'/storage')),
             'visibility' => 'public',
+            'key' => env('AWS_ACCESS_KEY_ID'),
+            'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            'region' => env('AWS_DEFAULT_REGION'),
+            'bucket' => env('AWS_PUBLIC_BUCKET') ?: env('AWS_BUCKET'),
+            'endpoint' => env('AWS_ENDPOINT'),
+            'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
             'throw' => false,
         ],
 
@@ -51,10 +58,11 @@ return [
             'key' => env('AWS_ACCESS_KEY_ID'),
             'secret' => env('AWS_SECRET_ACCESS_KEY'),
             'region' => env('AWS_DEFAULT_REGION'),
-            'bucket' => env('AWS_BUCKET'),
+            'bucket' => env('AWS_PAYMENT_PROOFS_BUCKET') ?: env('AWS_BUCKET'),
             'url' => env('AWS_URL'),
             'endpoint' => env('AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
+            'visibility' => 'private',
             'throw' => false,
             'report' => false,
         ],

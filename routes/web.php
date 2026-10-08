@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\BookingController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController; 
 use App\Http\Controllers\{
@@ -26,14 +27,16 @@ Route::get('/services', [ServiceController::class, 'index'])->name('services.ind
 Route::get('/gallery', [GalleryController::class, 'index'])->name('gallery.index');
 
 Route::get('/contact', [ContactController::class, 'index'])->name('contact.index');
-Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
+// Rate limited: max 5 pesan per 10 menit
+Route::post('/contact', [ContactController::class, 'store'])
+    ->middleware('throttle:5,10')
+    ->name('contact.store');
 
 Route::prefix('events')->group(function () {
     Route::get('/', [EventController::class, 'index'])->name('events.index');
     Route::get('/search', [EventController::class, 'search'])->name('events.search');
     Route::get('/{event}', [EventController::class, 'show'])->name('events.show');
 });
-Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
 /*
 |--------------------------------------------------------------------------
 | Authentication (User & Admin)
@@ -60,16 +63,45 @@ Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth')->
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile');
-    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::match(['put', 'patch'], '/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::put('/password', [ProfileController::class, 'updatePassword'])->name('password.update');
+    Route::get('/my-bookings', [BookingController::class, 'index'])->name('bookings.index');
     Route::get('/payment', [PaymentController::class, 'index'])->name('payments');
 
-    Route::post('/events/{event}/book', [EventController::class, 'book'])->name('events.book');
+    // Rate limited: max 5 booking per menit per user
+    Route::post('/events/{event}/book', [EventController::class, 'book'])
+        ->middleware('throttle:5,1')
+        ->name('events.book');
 
     Route::prefix('payment')->group(function () {
         Route::get('/success/{id}', [PaymentController::class, 'success'])->name('payment.success');
-        Route::post('/confirm', [PaymentController::class, 'confirm'])->name('payment.confirm');
+        // Rate limited: max 3 konfirmasi pembayaran per menit
+        Route::post('/confirm', [PaymentController::class, 'confirm'])
+            ->middleware('throttle:3,1')
+            ->name('payment.confirm');
         Route::get('/{service}', [PaymentController::class, 'show'])->name('payment.show');
     });
+});
+
+Route::middleware('guest')->group(function () {
+    Route::get('/forgot-password', [\App\Http\Controllers\Auth\PasswordResetController::class, 'create'])->name('password.request');
+    Route::post('/forgot-password', [\App\Http\Controllers\Auth\PasswordResetController::class, 'email'])->name('password.email');
+    Route::get('/reset-password/{token}', [\App\Http\Controllers\Auth\PasswordResetController::class, 'edit'])->name('password.reset');
+    Route::post('/reset-password', [\App\Http\Controllers\Auth\PasswordResetController::class, 'update'])->name('password.store');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/confirm-password', [\App\Http\Controllers\Auth\PasswordConfirmationController::class, 'create'])->name('password.confirm');
+    Route::post('/confirm-password', [\App\Http\Controllers\Auth\PasswordConfirmationController::class, 'store']);
+
+    Route::get('/verify-email', [\App\Http\Controllers\Auth\EmailVerificationController::class, 'notice'])->name('verification.notice');
+    Route::get('/verify-email/{id}/{hash}', [\App\Http\Controllers\Auth\EmailVerificationController::class, 'verify'])
+        ->middleware('signed')
+        ->name('verification.verify');
+    Route::post('/email/verification-notification', [\App\Http\Controllers\Auth\EmailVerificationController::class, 'send'])
+        ->middleware('throttle:6,1')
+        ->name('verification.send');
 });
 
 /*
@@ -84,9 +116,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     // Filament dashboard
     Route::get('/dashboard', [Dashboard::class, 'index'])->name('admin.dashboard');
 
-    // Admin payment detail
-    Route::get('/payments/{id}', [PaymentController::class, 'adminShow'])->name('admin.payments.show');
+    Route::get('/payments/{payment}/proof', [PaymentController::class, 'proof'])->name('admin.payments.proof');
 });
 
 // add auth.php
-
