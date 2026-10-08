@@ -98,8 +98,8 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-### 5. Migrasi & Seed Database
-Jalankan migrasi database beserta data awal (seeder admin, services, dan event):
+### 5. Migrasi & Inisialisasi Database
+Jalankan migrasi database beserta seeder awal:
 ```bash
 php artisan migrate --seed
 ```
@@ -128,12 +128,21 @@ Aplikasi siap diakses di:
 
 ---
 
-## 🔑 Kredensial Administrator Bawaan
+## 🔐 Manajemen Akun Administrator
 
-| Role | Email | Password |
-| :--- | :--- | :--- |
-| **Super Admin** | `dyacara@admin.com` | `admin123` |
-| **Administrator** | `admin@dyacara.com` | `admin123` |
+Demi keamanan lingkungan publik, kredensial sensitif tidak dicantumkan di repositori ini. Untuk membuat atau mengelola akun Administrator pada instalasi lokal Anda:
+
+1. **Melalui Database Seeder:**
+   Akun pengelola awal dibuat saat Anda menjalankan:
+   ```bash
+   php artisan db:seed
+   ```
+2. **Membuat Administrator Baru secara Mandiri:**
+   Gunakan perintah bawaan Filament CLI untuk membuat akun admin kustom dengan password yang Anda tentukan sendiri:
+   ```bash
+   php artisan make:filament-user
+   ```
+   Ikuti instruksi interaktif di terminal (masukkan Nama, Email, dan Password Anda).
 
 ---
 
