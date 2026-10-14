@@ -51,13 +51,12 @@ class PaymentResource extends Resource
                     ->dateTime('d M Y H:i'),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
-                    ->label('Status')
-                    ->colors([
-                        'warning' => PaymentStatus::Pending->value,
-                        'success' => PaymentStatus::Verified->value,
-                        'danger'  => PaymentStatus::Rejected->value,
-                    ])
-                    ->formatStateUsing(fn (string $state): string => PaymentStatus::from($state)->label()),
+                    ->color(fn ($state): string => match ($state instanceof PaymentStatus ? $state->value : (string) $state) {
+                        'verified', PaymentStatus::Verified->value => 'success',
+                        'rejected', PaymentStatus::Rejected->value => 'danger',
+                        default => 'warning',
+                    })
+                    ->formatStateUsing(fn ($state): string => $state instanceof PaymentStatus ? $state->label() : (PaymentStatus::tryFrom((string) $state)?->label() ?? (string) $state)),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('payment_method')
@@ -104,7 +103,7 @@ class PaymentResource extends Resource
 
         try {
             Mail::to($payment->email)->send(new PaymentStatusNotification($payment));
-        } catch (TransportExceptionInterface $exception) {
+        } catch (\Throwable $exception) {
             Log::error('Payment status notification email failed.', [
                 'payment_id' => $payment->id,
                 'status'     => $status->value,

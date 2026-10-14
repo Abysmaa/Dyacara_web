@@ -24,12 +24,15 @@
                             <div class="fw-semibold">Rp {{ number_format($payment->amount, 0, ',', '.') }}</div>
                         </div>
                         <div class="col-md-2">
-                            <span class="badge {{ match ($payment->status) {
+                            @php
+                                $paymentStatusValue = $payment->status instanceof \App\Enums\PaymentStatus ? $payment->status->value : (string) $payment->status;
+                            @endphp
+                            <span class="badge {{ match ($paymentStatusValue) {
                                 'verified' => 'bg-success',
                                 'rejected' => 'bg-danger',
                                 default => 'bg-warning text-dark',
                             } }}">
-                                {{ match ($payment->status) {
+                                {{ match ($paymentStatusValue) {
                                     'verified' => 'Terverifikasi',
                                     'rejected' => 'Ditolak',
                                     default => 'Menunggu Verifikasi',

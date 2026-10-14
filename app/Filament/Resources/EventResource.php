@@ -98,7 +98,12 @@ class EventResource extends Resource
                 Tables\Columns\TextColumn::make('status')
                     ->label('Status')
                     ->badge()
-                    ->formatStateUsing(fn (string $state): string => EventStatus::from($state)->label()),
+                    ->color(fn ($state): string => match ($state instanceof EventStatus ? $state->value : (string) $state) {
+                        'ongoing', EventStatus::Ongoing->value => 'success',
+                        'completed', EventStatus::Completed->value => 'gray',
+                        default => 'info',
+                    })
+                    ->formatStateUsing(fn ($state): string => $state instanceof EventStatus ? $state->label() : (EventStatus::tryFrom((string) $state)?->label() ?? (string) $state)),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('category')

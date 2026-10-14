@@ -1,5 +1,7 @@
 <?php
 
+use App\Enums\BookingStatus;
+use App\Enums\PaymentStatus;
 use App\Models\Booking;
 use App\Models\Event;
 use App\Models\Payment;
@@ -91,7 +93,7 @@ test('an authenticated user can request a booking for an event', function () {
         ->and($booking->user_id)->toBe($user->id)
         ->and($booking->name)->toBe($user->name)
         ->and($booking->email)->toBe($user->email)
-        ->and($booking->status)->toBe('pending');
+        ->and($booking->status)->toBe(BookingStatus::Pending);
 });
 
 test('users cannot submit a duplicate active booking for the same event', function () {
@@ -172,7 +174,7 @@ test('a user can submit a new request after their previous booking was rejected'
     ])->assertRedirect(route('events.show', $event));
 
     expect(Booking::where('event_id', $event->id)->where('user_id', $user->id)->count())->toBe(1)
-        ->and($booking->fresh()->status)->toBe('pending')
+        ->and($booking->fresh()->status)->toBe(BookingStatus::Pending)
         ->and($booking->fresh()->notes)->toBe('Please reconsider.');
 });
 
@@ -296,7 +298,7 @@ test('admins can confirm a pending booking', function () {
         ->test(ListBookings::class)
         ->callTableAction('confirm', $booking);
 
-    expect($booking->fresh()->status)->toBe('confirmed');
+    expect($booking->fresh()->status)->toBe(BookingStatus::Confirmed);
     Mail::assertSent(BookingStatusNotification::class, fn (BookingStatusNotification $mail): bool =>
         $mail->booking->is($booking->fresh())
     );
@@ -332,7 +334,7 @@ test('admins notify the customer when rejecting a pending booking', function () 
         ->test(ListBookings::class)
         ->callTableAction('reject', $booking);
 
-    expect($booking->fresh()->status)->toBe('rejected');
+    expect($booking->fresh()->status)->toBe(BookingStatus::Rejected);
     Mail::assertSent(BookingStatusNotification::class, fn (BookingStatusNotification $mail): bool =>
         $mail->booking->is($booking->fresh())
     );
@@ -427,7 +429,7 @@ test('admins notify the customer when verifying a payment', function () {
         ->test(ListPayments::class)
         ->callTableAction('verify', $payment);
 
-    expect($payment->fresh()->status)->toBe('verified');
+    expect($payment->fresh()->status)->toBe(PaymentStatus::Verified);
     Mail::assertSent(PaymentStatusNotification::class, fn (PaymentStatusNotification $mail): bool =>
         $mail->payment->is($payment->fresh())
     );
@@ -457,7 +459,7 @@ test('admins notify the customer when rejecting a payment', function () {
         ->test(ListPayments::class)
         ->callTableAction('reject', $payment);
 
-    expect($payment->fresh()->status)->toBe('rejected');
+    expect($payment->fresh()->status)->toBe(PaymentStatus::Rejected);
     Mail::assertSent(PaymentStatusNotification::class, fn (PaymentStatusNotification $mail): bool =>
         $mail->payment->is($payment->fresh())
     );

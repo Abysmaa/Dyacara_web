@@ -30,13 +30,16 @@
                             <div class="fw-semibold">{{ $booking->date->format('d M Y') }}</div>
                         </div>
                         <div class="col-md-3">
-                            <span class="badge {{ match ($booking->status) {
+                            @php
+                                $bookingStatusValue = $booking->status instanceof \App\Enums\BookingStatus ? $booking->status->value : (string) $booking->status;
+                            @endphp
+                            <span class="badge {{ match ($bookingStatusValue) {
                                 'confirmed' => 'bg-success',
                                 'rejected' => 'bg-danger',
                                 'completed' => 'bg-secondary',
                                 default => 'bg-warning text-dark',
                             } }}">
-                                {{ match ($booking->status) {
+                                {{ match ($bookingStatusValue) {
                                     'confirmed' => 'Dikonfirmasi',
                                     'rejected' => 'Ditolak',
                                     'completed' => 'Selesai',

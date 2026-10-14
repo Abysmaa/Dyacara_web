@@ -13,12 +13,15 @@
                             <div class="col-sm-6">
                                 <h3 class="text-dark mb-1">INVOICE</h3>
                                 <small class="text-muted">Status:
-                                    <span class="badge {{ match ($payment->status) {
+                                    @php
+                                        $paymentStatusValue = $payment->status instanceof \App\Enums\PaymentStatus ? $payment->status->value : (string) $payment->status;
+                                    @endphp
+                                    <span class="badge {{ match ($paymentStatusValue) {
                                         'verified' => 'bg-success',
                                         'rejected' => 'bg-danger',
                                         default => 'bg-warning',
                                     } }}">
-                                        {{ match ($payment->status) {
+                                        {{ match ($paymentStatusValue) {
                                             'verified' => 'Terverifikasi',
                                             'rejected' => 'Ditolak',
                                             default => 'Menunggu Verifikasi',

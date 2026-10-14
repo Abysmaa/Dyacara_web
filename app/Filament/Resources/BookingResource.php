@@ -78,13 +78,13 @@ class BookingResource extends Resource
                 Tables\Columns\TextColumn::make('status')
                     ->label('Status')
                     ->badge()
-                    ->colors([
-                        'warning' => BookingStatus::Pending->value,
-                        'success' => BookingStatus::Confirmed->value,
-                        'danger'  => BookingStatus::Rejected->value,
-                        'gray'    => BookingStatus::Completed->value,
-                    ])
-                    ->formatStateUsing(fn (string $state): string => BookingStatus::from($state)->label()),
+                    ->color(fn ($state): string => match ($state instanceof BookingStatus ? $state->value : (string) $state) {
+                        'confirmed', BookingStatus::Confirmed->value => 'success',
+                        'rejected', BookingStatus::Rejected->value => 'danger',
+                        'completed', BookingStatus::Completed->value => 'gray',
+                        default => 'warning',
+                    })
+                    ->formatStateUsing(fn ($state): string => $state instanceof BookingStatus ? $state->label() : (BookingStatus::tryFrom((string) $state)?->label() ?? (string) $state)),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Tanggal Permintaan')
                     ->dateTime('d M Y H:i')
@@ -125,7 +125,7 @@ class BookingResource extends Resource
 
         try {
             Mail::to($booking->email)->send(new BookingStatusNotification($booking));
-        } catch (TransportExceptionInterface $exception) {
+        } catch (\Throwable $exception) {
             Log::error('Booking status notification email failed.', [
                 'booking_id' => $booking->id,
                 'status'     => $status->value,
