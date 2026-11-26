@@ -102,20 +102,11 @@ class PaymentController extends Controller
 
     public function proof(Payment $payment)
     {
-        $privateDisk = Storage::disk(config('filesystems.payment_proofs'));
+        $disk = Storage::disk(config('filesystems.payment_proofs'));
 
-        if ($privateDisk->exists($payment->proof_image)) {
-            return $privateDisk->response(
-                $payment->proof_image,
-                headers: ['Cache-Control' => 'private, no-store'],
-            );
-        }
+        abort_unless($disk->exists($payment->proof_image), 404);
 
-        $legacyPublicDisk = Storage::disk('public');
-
-        abort_unless($legacyPublicDisk->exists($payment->proof_image), 404);
-
-        return $legacyPublicDisk->response(
+        return $disk->response(
             $payment->proof_image,
             headers: ['Cache-Control' => 'private, no-store'],
         );
