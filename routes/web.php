@@ -45,7 +45,9 @@ Route::prefix('events')->group(function () {
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'login'])->name('login');
-    Route::post('/login', [LoginController::class, 'authenticate'])->name('login.authenticate');
+    Route::post('/login', [LoginController::class, 'authenticate'])
+        ->middleware('throttle:5,1')
+        ->name('login.authenticate');
     
     // Tambahkan route untuk registrasi
     Route::get('/register', [\App\Http\Controllers\Auth\RegisterController::class, 'create'])->name('register');    
