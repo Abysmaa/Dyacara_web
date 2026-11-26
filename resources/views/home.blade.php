@@ -115,7 +115,7 @@
                             <h5 class="card-title">{{ $event->title }}</h5>
                         </div>
                         <div class="card-body">
-                            <p class="card-text">{!! $event->description !!}</p>
+                            <p class="card-text">{!! $event->sanitized_description !!}</p>
                         </div>
                     </div>
                 </div>
