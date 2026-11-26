@@ -19,7 +19,6 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         'name',
         'email',
         'password',
-        'is_admin'
     ];
 
     protected $hidden = [
